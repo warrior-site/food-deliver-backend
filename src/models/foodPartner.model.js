@@ -16,7 +16,7 @@ const foodPartnerSchema = new mongoose.Schema({
     },
     phone: {
         type: String,
-        required: true
+        // required: true
     },
     logo: {
         type: String,

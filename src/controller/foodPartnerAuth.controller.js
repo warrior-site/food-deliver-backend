@@ -1,5 +1,5 @@
 import FoodPartner from "../models/foodPartner.model.js";
-import bcrypt from "bcryptjs";
+import bcrypt from "bcrypt";
 import { setCookie } from "../utils/setCookies.js";
 
 export const checkEmail = async (req, res) => {
