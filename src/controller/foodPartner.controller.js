@@ -77,4 +77,4 @@ export const changeStatus = async (req, res) => {
     console.error("Error updating order status:", error);
     res.status(500).json({ success: false, message: "Error updating order status", error });
   }
-};
+}; 
