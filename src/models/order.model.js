@@ -2,6 +2,11 @@ import mongoose from "mongoose";
 
 const orderSchema = new mongoose.Schema({
   userId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
+  foodPartnerId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "FoodPartner",
+    required: true
+  },
   foodItems: [
     {
       foodId: { type: mongoose.Schema.Types.ObjectId, ref: "Food", required: true },

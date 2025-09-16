@@ -3,17 +3,39 @@ import bcrypt from "bcrypt"
 import { setCookie } from "../utils/setCookies.js"
 
 export const checkEmail = async (req, res) => {
-    const { email } = req.body
-    if (!email) {
-        return res.status(400).json({ message: "Email is required" })
-    }
-    // Check if email exists in the database
-    const user = await User.findOne({ email })
+  const { email } = req.body;
+
+  if (!email) {
+    return res
+      .status(400)
+      .json({ success: false, message: "Email is required" });
+  }
+
+  try {
+    const user = await User.findOne({ email });
+
     if (user) {
-        return res.status(409).json({ message: "Email already exists" })
+      return res.status(200).json({
+        success: false,
+        available: false,
+        message: "Email already exists",
+      });
     }
-    return res.status(200).json({ message: "Email is available" })
-}
+
+    return res.status(200).json({
+      success: true,
+      available: true,
+      message: "Email is available",
+    });
+  } catch (error) {
+    console.error("Error checking email:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Server error while checking email",
+    });
+  }
+};
+
 
 export const checkAuth = async (req, res) => {
     try {
@@ -65,6 +87,7 @@ export const register = async (req, res) => {
 
     } catch (error) {
         console.log(error)
+        res.status(500).json({success:false, message: "Internal server error" })
     }
 }
 
@@ -93,7 +116,10 @@ export const login = async (req,res)=>{
             user: {
                 username: user.username,
                 _id: user._id,
-                email: user.email
+                email: user.email,
+                profilePhoto: user.profilePhoto,
+                location: user.location,
+                isAccountComplete: user.isAccountComplete
             }
         });
 

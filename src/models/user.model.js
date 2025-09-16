@@ -4,44 +4,51 @@ const userSchema = new mongoose.Schema({
   username: {
     type: String,
     required: true,
-    // unique: true,
-    trim: true
+    trim: true,
   },
   email: {
     type: String,
     required: true,
     unique: true,
-    lowercase: true
+    lowercase: true,
+  },
+  password: {
+    type: String,
+    required: true, // will be hashed before saving
+  },
+  accountStatus: {
+    type: String,
+    enum: ["complete", "incomplete"],
+    default: "incomplete"
   },
   profilePhoto: {
     type: String,
-    default: ""  // can store URL or file path
+    default: "", // can store URL or file path
   },
   location: {
-    city: {
-      type: String,
-    //   required: true
-    },
-    locality: {
-      type: String,
-    //   required: true
-    },
+    city: String,
+    locality: String,
     coordinates: {
-      type: {
-        type: String,
-        enum: ["Point"],
-        default: "Point"
-      },
-      coordinates: {
-        type: [Number], // [longitude, latitude]
-        // required: true
-      }
-    }
-  }
-});
+      type: [Number], // [longitude, latitude]
+      default: undefined,
+    },
+  },
+  totalOrders: {
+    type: Number,
+    default: 0
+  },
+  totalSpent: {
+    type: Number,
+    default: 0
+  },
+  totalRefunds: {
+    type: Number,
+    default: 0
+  },
 
-// for geospatial queries (e.g., find nearby users)
-userSchema.index({ "location.coordinates": "2dsphere" });
+}, { timestamps: true });
+
+// (no geo index for now, keep signup simple)
 
 const User = mongoose.model("User", userSchema);
 
