@@ -13,7 +13,7 @@ const upload = multer({
     storage: multer.memoryStorage(),
 })
 
-router.get("/get-recommendation/", foodRecommend);
+router.get("/get-recommendation/:id", foodRecommend);
 router.get("/get-fav/:id", getFav);
 router.post("/update-profile/:id", upload.fields([{ name: "profilePhoto", maxCount: 1 }]), updateUser);
 router.post("/get-food/:id", getFoodFromId);

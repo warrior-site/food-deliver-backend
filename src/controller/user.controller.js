@@ -10,7 +10,7 @@ import imagekit from "../services/imagekit.service.js";
 
 
 export const foodRecommend = async (req, res) => {
-  const userId = req.query.id;
+  const userId = req.params.id;
   const page = parseInt(req.query.page) || 1; // current page
   const limit = parseInt(req.query.limit) || 10; // items per page
   const skip = (page - 1) * limit;
@@ -23,10 +23,10 @@ export const foodRecommend = async (req, res) => {
     // }
 
     // 🔹 Location-based filter (disabled for now)
-    // const foodPartner = await FoodPartner.find({ "location.city": user.location.city });
-    // if (foodPartner.length === 0) {
-    //   return res.status(404).json({ success: false, message: "No food partners found in your city" });
-    // }
+    const foodPartner = await FoodPartner.find({});
+    if (foodPartner.length === 0) {
+      return res.status(404).json({ success: false, message: "No food partners found in your city" });
+    }
 
     // const ids = foodPartner.map(partner => partner._id);
 
@@ -44,6 +44,7 @@ export const foodRecommend = async (req, res) => {
       totalPages: Math.ceil(total / limit),
       totalItems: total,
       foods,
+      foodPartners: foodPartner,
     });
   } catch (error) {
     console.log(error);

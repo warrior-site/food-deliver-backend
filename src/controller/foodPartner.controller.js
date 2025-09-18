@@ -4,7 +4,7 @@ import imagekit from "../services/imagekit.service.js"; // your configured Image
 
 export const addFood = async (req, res) => {
   try {
-    const { name, description, price, category } = req.body;
+    const { name, description, price, category, foodPartnerId } = req.body;
     const photos = req.files?.photos || [];
     const video = req.files?.video ? req.files.video[0] : null;
 
@@ -31,6 +31,7 @@ export const addFood = async (req, res) => {
     // Create food item
     const foodItem = new Food({
       name,
+      foodPartnerId,
       description,
       price,
       category,
@@ -47,6 +48,97 @@ export const addFood = async (req, res) => {
   } catch (error) {
     console.error("Error adding food item:", error);
     res.status(500).json({ message: "Error adding food item", error });
+  }
+};
+
+export const updateFoodPartner = async (req, res) => {
+  const partnerId = req.params.id;
+  const updates = req.body;
+
+  // handle file uploads (logo / coverImage)
+  const logoFile = req.files?.logo?.[0];
+  const coverImageFile = req.files?.coverImage?.[0];
+
+  try {
+    const partner = await FoodPartner.findById(partnerId);
+    if (!partner) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Food partner not found" });
+    }
+
+    // 🔒 Prevent updating restricted fields
+    delete updates.email;
+    delete updates.password;
+
+    // Upload logo if provided
+    if (logoFile) {
+      const uploadedLogo = await imagekit.upload({
+        file: logoFile.buffer,
+        fileName: `logo_${Date.now()}.jpg`,
+      });
+      partner.logo = uploadedLogo.url;
+    }
+
+    // Upload cover image if provided
+    if (coverImageFile) {
+      const uploadedCover = await imagekit.upload({
+        file: coverImageFile.buffer,
+        fileName: `cover_${Date.now()}.jpg`,
+      });
+      partner.coverImage = uploadedCover.url;
+    }
+
+    // Direct update without Object.keys
+    if (updates.name) partner.name = updates.name;
+    if (updates.phone) partner.phone = updates.phone;
+    if (updates.logo) partner.logo = updates.logo;
+    if (updates.coverImage) partner.coverImage = updates.coverImage;
+    if (updates.description) partner.description = updates.description;
+    if (updates.cuisineTypes) partner.cuisineTypes = updates.cuisineTypes;
+
+    // Handle location separately
+    if (updates.location) {
+      if (updates.location.city) partner.location.city = updates.location.city;
+      if (updates.location.locality) partner.location.locality = updates.location.locality;
+
+      if (updates.location.coordinates) {
+        // If client sends [lng, lat]
+        if (Array.isArray(updates.location.coordinates)) {
+          partner.location.coordinates = {
+            type: "Point",
+            coordinates: updates.location.coordinates,
+          };
+        }
+
+        // If client sends { longitude, latitude }
+        else if (
+          typeof updates.location.coordinates === "object" &&
+          updates.location.coordinates.longitude &&
+          updates.location.coordinates.latitude
+        ) {
+          partner.location.coordinates = {
+            type: "Point",
+            coordinates: [
+              updates.location.coordinates.longitude,
+              updates.location.coordinates.latitude,
+            ],
+          };
+        }
+      }
+    }
+
+
+    await partner.save();
+
+    res.status(200).json({
+      success: true,
+      message: "Food partner updated successfully",
+      partner,
+    });
+  } catch (error) {
+    console.error("Error updating food partner:", error);
+    res.status(500).json({ success: false, message: "Server error" });
   }
 };
 
